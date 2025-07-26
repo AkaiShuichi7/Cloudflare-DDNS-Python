@@ -32,14 +32,14 @@ cp .env.example .env
 
 ### 2. 使用 Docker 部署 (推荐)
 
-这是最简单、最推荐的部署方式。
+这是最简单、最推荐的部署方式。我们通过 GitHub Actions 自动构建并发布 Docker 镜像到 GitHub Container Registry (GHCR)，您无需在本地构建。
 
-**a. 构建 Docker 镜像**
+**a. 拉取 Docker 镜像**
 
-在项目根目录下，执行以下命令来构建镜像：
+从 GHCR 拉取最新的 Docker 镜像：
 
 ```bash
-docker build -t cfstddns-py .
+docker pull ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
 ```
 
 **b. 运行 Docker 容器**
@@ -51,7 +51,7 @@ docker run -d \
   --name my-cfstddns \
   --restart always \
   -v $(pwd)/.env:/app/.env \
-  cfstddns-py
+  ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
 ```
 
 - `-d`: 后台运行容器。

@@ -42,29 +42,23 @@ cp .env.example .env
 docker pull ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
 ```
 
-**b. 运行 Docker 容器**
+**b. 使用 Docker Compose 运行**
 
-使用以下命令在后台运行容器。请确保您已经创建并配置好了 `.env` 文件。
+我们推荐使用 Docker Compose 进行部署，因为它能更好地管理配置和数据卷。
+
+1.  确保您已经根据 `env.example` 创建并配置好了 `.env` 文件。
+2.  在项目根目录下，执行以下命令启动服务：
 
 ```bash
-docker run -d \
-  --name my-cfstddns \
-  --restart always \
-  -v $(pwd)/.env:/app/.env \
-  ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
+docker-compose up -d
 ```
-
-- `-d`: 后台运行容器。
-- `--name`: 为容器指定一个名称。
-- `--restart always`: 确保容器在退出或服务器重启后能自动重启。
-- `-v $(pwd)/.env:/app/.env`: 将您本地的 `.env` 文件挂载到容器内部，这是**必须**的步骤，以便程序能读取到您的配置。
 
 **c. 查看日志**
 
 要查看程序的运行日志，可以使用以下命令：
 
 ```bash
-docker logs -f my-cfstddns
+docker-compose logs -f
 ```
 
 ### 3. 本地运行与测试 (适用于开发)

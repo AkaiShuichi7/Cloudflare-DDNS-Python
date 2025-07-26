@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cfstddns"
+version = "0.1.0"
+description = "使用 CloudflareSpeedTest 工具优选 IP 后自动 DDNS 到 Cloudflare"
+authors = ["Cline"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.8"
+python-dotenv = "^1.0.0"
+requests = "^2.31.0"
+python-crontab = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

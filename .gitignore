@@ -1,0 +1,25 @@
+# 敏感的环境变量文件
+.env
+
+# Python 缓存和编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 构建和分发产物
+build/
+dist/
+*.egg-info/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE/编辑器配置文件
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用程序代码
 COPY app/ ./app/
 
+# 创建并声明数据卷，用于持久化测速工具和结果
+RUN mkdir /data
+VOLUME /data
+
 # 复制 .env.example，在实际运行时应通过卷挂载 .env 文件
 COPY .env.example ./.env
 

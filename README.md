@@ -47,13 +47,29 @@ docker pull ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
 我们推荐使用 Docker Compose 进行部署，因为它能更好地管理配置和数据卷。
 
 1.  确保您已经根据 `env.example` 创建并配置好了 `.env` 文件。
-2.  在项目根目录下，执行以下命令启动服务：
+2.  在项目根目录下创建一个 `data` 目录，用于持久化测速工具和结果文件。
 
-```bash
-docker-compose up -d
-```
+    ```bash
+    mkdir data
+    ```
+3.  在项目根目录下，执行以下命令启动服务：
 
-**c. 查看日志**
+    ```bash
+    docker-compose up -d
+    ```
+
+**c. 手动更新测速工具 (可选)**
+
+在网络不佳的环境下（例如中国大陆），程序可能无法自动从 GitHub 下载测速工具。此时，您可以手动下载并放置。
+
+1.  访问 [CloudflareST 发布页面](https://github.com/XIU2/CloudflareSpeedTest/releases)。
+2.  根据您的服务器架构（通常是 `linux_amd64` 或 `linux_arm64`）下载最新的 `.tar.gz` 压缩包。
+3.  解压压缩包，找到名为 `CloudflareST` 的可执行文件。
+4.  将其重命名为 `cfst`。
+5.  将 `cfst` 文件和 `ip.txt` 文件一同放入您在宿主机上创建的 `data` 目录中。
+6.  重新启动 Docker 容器 (`docker-compose restart`)，程序会自动使用您提供的工具。
+
+**d. 查看日志**
 
 要查看程序的运行日志，可以使用以下命令：
 
@@ -102,3 +118,7 @@ poetry run python -m app.main --run-task
 ## 🤝 贡献
 
 欢迎提交 Pull Request 或提出 Issues 来改进这个项目。
+
+## ❤️ 致谢
+
+- 本项目依赖于 [XIU2/CloudflareSpeedTest](https://github.com/XIU2/CloudflareSpeedTest) 项目提供的强大测速工具，没有它就没有本项目。在此向其开发者 **XIU2** 表示衷心的感谢！

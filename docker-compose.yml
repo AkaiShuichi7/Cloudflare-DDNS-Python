@@ -7,4 +7,4 @@ services:
     restart: always
     volumes:
       - ./.env:/app/.env
-      - ./result.csv:/app/result.csv
+      - ./data:/data

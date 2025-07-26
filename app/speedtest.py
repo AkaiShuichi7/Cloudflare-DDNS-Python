@@ -4,19 +4,18 @@ import requests
 import tarfile
 import subprocess
 import csv
-import shutil
 from . import config
 
 # CloudflareST GitHub 仓库信息
 CFST_REPO = "XIU2/CloudflareSpeedTest"
 CFST_API_URL = f"https://api.github.com/repos/{CFST_REPO}/releases/latest"
 
-# 目标目录
-# 将所有临时文件和结果都放在 /app 目录下，方便 Docker 卷挂载
-APP_DIR = "/app"
+# 数据目录，用于存放测速工具、IP列表和结果
+# 设置为独立目录，方便 Docker 进行数据卷挂载和持久化
+DATA_DIR = "/data"
 EXECUTABLE_NAME = "cfst"
-RESULT_FILE = os.path.join(APP_DIR, "result.csv")
-EXECUTABLE_PATH = os.path.join(APP_DIR, EXECUTABLE_NAME)
+RESULT_FILE = os.path.join(DATA_DIR, "result.csv")
+EXECUTABLE_PATH = os.path.join(DATA_DIR, EXECUTABLE_NAME)
 
 
 def get_arch():
@@ -65,10 +64,10 @@ def setup_speedtest_tool():
     print(f"正在从 {download_url} 下载测速工具...")
 
     try:
-        # 确保 /app 目录存在
-        os.makedirs(APP_DIR, exist_ok=True)
+        # 确保数据目录存在
+        os.makedirs(DATA_DIR, exist_ok=True)
 
-        archive_path = os.path.join(APP_DIR, "cfst.tar.gz")
+        archive_path = os.path.join(DATA_DIR, "cfst.tar.gz")
 
         with requests.get(download_url, stream=True) as r:
             r.raise_for_status()
@@ -80,10 +79,10 @@ def setup_speedtest_tool():
         with tarfile.open(archive_path, "r:gz") as tar_ref:
             # 解压所有文件到目标目录，不保留原始目录结构
             for member in tar_ref.getmembers():
-                # 只提取文件，并去除路径，直接放在 APP_DIR 下
+                # 只提取文件，并去除路径，直接放在 DATA_DIR 下
                 if member.isfile():
                     member.name = os.path.basename(member.name)
-                    tar_ref.extract(member, path=APP_DIR)
+                    tar_ref.extract(member, path=DATA_DIR)
 
         # 添加可执行权限
         os.chmod(EXECUTABLE_PATH, 0o755)
@@ -91,7 +90,7 @@ def setup_speedtest_tool():
         # 清理压缩文件
         os.remove(archive_path)
 
-        print(f"测速工具已成功解压到 {APP_DIR}")
+        print(f"测速工具已成功解压到 {DATA_DIR}")
         return True
 
     except (requests.RequestException, tarfile.TarError, OSError) as e:
@@ -107,7 +106,7 @@ def run_speedtest():
     # 根据 IP 版本选择对应的 IP 文件名
     # IPv4 对应 ip.txt, IPv6 对应 ipv6.txt
     ip_file_name = "ip.txt" if config.IP_VERSION == "ipv4" else "ipv6.txt"
-    ip_file_path = os.path.join(APP_DIR, ip_file_name)
+    ip_file_path = os.path.join(DATA_DIR, ip_file_name)
 
     # 构建命令行参数
     cmd = [
@@ -172,10 +171,10 @@ def get_top_ips(count=1):
                     break
                 if row and len(row) > 0:
                     ips.append(row)  # IP 地址是第一列
-        
+
         if not ips:
             print("警告: result.csv 文件中未找到任何有效的 IP 地址。")
-        
+
         return ips
     except (FileNotFoundError, StopIteration):
         print(f"错误: 测速结果文件 {RESULT_FILE} 未找到或为空。")
@@ -189,7 +188,7 @@ def get_best_ip():
         best_ip = top_ips
         print(f"获取到最优 IP: {best_ip}")
         return best_ip
-    
+
     print("警告: 未能从 result.csv 获取到最优 IP。")
     return None
 
@@ -201,7 +200,7 @@ if __name__ == "__main__":
         print(f"\n测试完成，最优 IP 是: {best_ip_address}")
     else:
         print("\n测试失败。")
-    
+
     # 测试获取多个 IP
     print("\n测试获取前 5 个 IP...")
     top_5_ips = get_top_ips(5)

@@ -19,9 +19,7 @@ def run_update_task():
             return
 
         # 2. 执行测速并获取相应数量的 IP
-        # 注意: 此处假设测速已完成，直接从结果文件获取 IP。
-        # 在实际运行中，您可能需要取消下面这行代码的注释。
-        # speedtest.run_speedtest()
+        speedtest.run_speedtest()
 
         print(f"需要为 {num_hostnames} 个域名获取 {num_hostnames} 个最优 IP...")
         top_ip_infos = speedtest.get_top_ips(count=num_hostnames)

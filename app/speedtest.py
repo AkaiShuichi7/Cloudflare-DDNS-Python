@@ -12,10 +12,11 @@ CFST_REPO = "XIU2/CloudflareSpeedTest"
 CFST_API_URL = f"https://api.github.com/repos/{CFST_REPO}/releases/latest"
 
 # 目标目录
-TEMP_DIR = "/tmp/cfst"
+# 将所有临时文件和结果都放在 /app 目录下，方便 Docker 卷挂载
+APP_DIR = "/app"
 EXECUTABLE_NAME = "cfst"
-RESULT_FILE = os.path.join(TEMP_DIR, "result.csv")
-EXECUTABLE_PATH = os.path.join(TEMP_DIR, EXECUTABLE_NAME)
+RESULT_FILE = os.path.join(APP_DIR, "result.csv")
+EXECUTABLE_PATH = os.path.join(APP_DIR, EXECUTABLE_NAME)
 
 
 def get_arch():
@@ -64,12 +65,10 @@ def setup_speedtest_tool():
     print(f"正在从 {download_url} 下载测速工具...")
 
     try:
-        # 确保目标目录存在且清空
-        if os.path.exists(TEMP_DIR):
-            shutil.rmtree(TEMP_DIR)
-        os.makedirs(TEMP_DIR)
+        # 确保 /app 目录存在
+        os.makedirs(APP_DIR, exist_ok=True)
 
-        archive_path = os.path.join(TEMP_DIR, "cfst.tar.gz")
+        archive_path = os.path.join(APP_DIR, "cfst.tar.gz")
 
         with requests.get(download_url, stream=True) as r:
             r.raise_for_status()
@@ -81,10 +80,10 @@ def setup_speedtest_tool():
         with tarfile.open(archive_path, "r:gz") as tar_ref:
             # 解压所有文件到目标目录，不保留原始目录结构
             for member in tar_ref.getmembers():
-                # 只提取文件，并去除路径，直接放在 TEMP_DIR 下
+                # 只提取文件，并去除路径，直接放在 APP_DIR 下
                 if member.isfile():
                     member.name = os.path.basename(member.name)
-                    tar_ref.extract(member, path=TEMP_DIR)
+                    tar_ref.extract(member, path=APP_DIR)
 
         # 添加可执行权限
         os.chmod(EXECUTABLE_PATH, 0o755)
@@ -92,7 +91,7 @@ def setup_speedtest_tool():
         # 清理压缩文件
         os.remove(archive_path)
 
-        print(f"测速工具已成功解压到 {TEMP_DIR}")
+        print(f"测速工具已成功解压到 {APP_DIR}")
         return True
 
     except (requests.RequestException, tarfile.TarError, OSError) as e:
@@ -108,7 +107,7 @@ def run_speedtest():
     # 根据 IP 版本选择对应的 IP 文件名
     # IPv4 对应 ip.txt, IPv6 对应 ipv6.txt
     ip_file_name = "ip.txt" if config.IP_VERSION == "ipv4" else "ipv6.txt"
-    ip_file_path = os.path.join(TEMP_DIR, ip_file_name)
+    ip_file_path = os.path.join(APP_DIR, ip_file_name)
 
     # 构建命令行参数
     cmd = [

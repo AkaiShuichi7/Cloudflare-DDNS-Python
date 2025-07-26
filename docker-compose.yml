@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  cfstddns:
+    image: ghcr.io/akaishuichi7/cloudflare-ddns-python:latest
+    container_name: cfstddns
+    restart: always
+    volumes:
+      - ./.env:/app/.env
+      - ./result.csv:/app/result.csv
